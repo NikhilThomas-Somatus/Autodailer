@@ -10,28 +10,18 @@ GO
 
 ALTER PROCEDURE [dbo].[sp_AutoDialerCampagin] AS
 
-Declare @PatientActivityId int=0,@IC_DateOfLastCall varchar(max) ='',@IC_CallNotes varchar(max) = '' ,@IC_AgentName varchar(max) ='', @ActivityID int = 0
+Declare @PatientActivityId int=0,@IC_DateOfLastCall varchar(max) ='',@IC_CallNotes varchar(max) = '' ,@IC_AgentName varchar(max) ='', @ActivityID int = 0,  @taskid int, @patientid int
+
 
 DROP TABLE ETL_AutoDialer_List_STG
 
 select
-*
+a.*, b.Patientid
 into ETL_AutoDialer_List_STG
-from ETL_AutoDialer_List
-where TransferToRc = 0
-
-
-ALTER TABLE ETL_AutoDialer_List_STG
-Add Patientid varchar(500)
-
-UPDATE ETL_AutoDialer_List_STG SET Patientid = b.patientid
-from ETL_AutoDialer_List_STG a
+from ETL_AutoDialer_List a 
 inner join patient b on a.[Member ID] = b.EnrollmentNumber
-
-
-DELETE FROM ETL_AutoDialer_List_STG
-where patientid in (select patientid from patientEligibility where Payername = 'Anthem' and LineofBusinessID = 9542)
-
+where a.TransferToRc = 0
+and  b.patientid not in (select patientid from patientEligibility where Payername = 'Anthem' and LineofBusinessID = 9542)
 
 
 
@@ -910,10 +900,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid ,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1026,10 +1018,12 @@ and [IC_SystemClassification] = '5' and [IC_AgentDisposition] = '5702'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1094,10 +1088,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1105,8 +1101,6 @@ where [IC_SystemClassification] = '5'
 and [IC_AgentDisposition] = '5703'
 and (c.activityid = 2296 or c.activityid = 2297 or c.activityid = 2298 or c.activityid = 9755 or c.activityid = 9756)
 
-select * from lookup
-where displayvalue like '%Outreach%'
 
 UPDATE ETL_AutoDialer_List_STG SET 
 TransferToRc = 1,
@@ -1192,10 +1186,12 @@ and b.PatientID is not null
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+TYPE
 )
 select a.patientid ,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1307,10 +1303,12 @@ and [IC_SystemClassification] = '5' and [IC_AgentDisposition] = '5706'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1379,10 +1377,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1448,10 +1448,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1541,10 +1543,12 @@ and a.[Patient Activity ID] is not null
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1608,10 +1612,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1675,11 +1681,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1789,11 +1796,12 @@ and [IC_SystemClassification] = '5' and [IC_AgentDisposition] = '6098'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select 
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1857,11 +1865,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select 
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -1971,11 +1980,12 @@ and [IC_SystemClassification] = '5' and [IC_AgentDisposition] = '6461'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select 
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2083,11 +2093,12 @@ and [IC_SystemClassification] = '13'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2149,11 +2160,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select 
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2214,11 +2226,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2375,11 +2388,12 @@ and [IC_SystemClassification] = '17'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2485,11 +2499,12 @@ and [IC_SystemClassification] = '18'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select 
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2551,11 +2566,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select 
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2615,11 +2631,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select 
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2724,11 +2741,12 @@ and [IC_SystemClassification] = '21'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select
-a.patientid,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2832,10 +2850,12 @@ and [IC_SystemClassification] = '22'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2896,10 +2916,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -2965,10 +2987,12 @@ where [IC_SystemClassification] = '26'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3023,10 +3047,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3086,10 +3112,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3150,10 +3178,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3213,10 +3243,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select a.patientid ,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3277,10 +3309,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select a.patientid ,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3341,10 +3375,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
-select a.patientid ,
-a.[Patient Activity ID]
+select a.patientid,
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3451,10 +3487,12 @@ and [IC_SystemClassification] = '40'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3561,10 +3599,12 @@ and [IC_SystemClassification] = '55'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3670,10 +3710,12 @@ and [IC_SystemClassification] = '56'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3780,10 +3822,12 @@ and [IC_SystemClassification] = '57'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3890,10 +3934,12 @@ and [IC_SystemClassification] = '81'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -3953,10 +3999,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -4062,10 +4110,12 @@ and [IC_SystemClassification] = '83'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -4126,10 +4176,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -4189,10 +4241,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -4252,10 +4306,12 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -4361,10 +4417,12 @@ and [IC_SystemClassification] = '90'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -4470,10 +4528,12 @@ and [IC_SystemClassification] = '91'
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
@@ -4541,6 +4601,7 @@ COMMIT
 
 ------6513
 
+
 DROP TABLE ETL_AutoDialer_TMP;
 
 BEGIN TRANSACTION
@@ -4584,15 +4645,17 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'Outreach'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
 where [IC_SystemClassification] = '6513'
-and (c.activityid = 2296 or c.activityid = 2297 or c.activityid = 2298 or c.activityid = 9755 or c.activityid = 9756)
+and (c.activityid = 9945 or c.activityid = 9946 or c.activityid = 9947)
 
 UPDATE ETL_AutoDialer_List_STG SET 
 TransferToRc = 1,
@@ -4612,6 +4675,8 @@ Select * into ETL_AutoDialer_TMP from ETL_AutoDialer_List_STG where [IC_SystemCl
 
 WHILE (SELECT COUNT(1) FROM ETL_AutoDialer_TMP) > 0 
 BEGIN
+
+
 
                select Top 1 @PatientActivityId=[Patient Activity ID], @IC_DateOfLastCall= case when [IC_DateOfLastCall] is null then '' else cast([IC_DateOfLastCall] as varchar(max)) end, 
 			 @IC_CallNotes=[IC_CallNotes],@IC_AgentName=[IC_AgentName]
@@ -4647,15 +4712,18 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'NP'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
 where [IC_SystemClassification] = '6876'
-and (c.activityid = 2296 or c.activityid = 2297 or c.activityid = 2298 or c.activityid = 9755 or c.activityid = 9756)
+and (c.activityid = 9945 or c.activityid = 9946 or c.activityid = 9947)
+
 
 UPDATE ETL_AutoDialer_List_STG SET 
 TransferToRc = 1,
@@ -4675,6 +4743,7 @@ Select * into ETL_AutoDialer_TMP from ETL_AutoDialer_List_STG where [IC_SystemCl
 
 WHILE (SELECT COUNT(1) FROM ETL_AutoDialer_TMP) > 0 
 BEGIN
+
 
                select Top 1 @PatientActivityId=[Patient Activity ID], @IC_DateOfLastCall= case when [IC_DateOfLastCall] is null then '' else cast([IC_DateOfLastCall] as varchar(max)) end, 
 			 @IC_CallNotes=[IC_CallNotes],@IC_AgentName=[IC_AgentName]
@@ -4710,15 +4779,17 @@ END
 
 INSERT INTO SRC_AutoLoaderFrontLoader(
 patientid,
-patientactivityid
+patientactivityid,
+Type
 )
 select a.patientid,
-a.[Patient Activity ID]
+a.[Patient Activity ID],
+'NP'
 from ETL_AutoDialer_List_STG a
 inner join patient b on a.patientid = b.patientid
 inner join patientactivity c on a.[patient activity id] = c.patientactivityid
 where [IC_SystemClassification] = '5793'
-and (c.activityid = 2296 or c.activityid = 2297 or c.activityid = 2298 or c.activityid = 9755 or c.activityid = 9756)
+and (c.activityid = 9945 or c.activityid = 9946 or c.activityid = 9947)
 
 UPDATE ETL_AutoDialer_List_STG SET 
 TransferToRc = 1,
@@ -4790,6 +4861,7 @@ Select * into ETL_AutoDialer_TMP from ETL_AutoDialer_List_STG where [IC_SystemCl
 WHILE (SELECT COUNT(1) FROM ETL_AutoDialer_TMP) > 0 
 BEGIN
 
+
                select Top 1 @PatientActivityId=[Patient Activity ID], @IC_DateOfLastCall= case when [IC_DateOfLastCall] is null then '' else cast([IC_DateOfLastCall] as varchar(max)) end, 
 			 @IC_CallNotes=[IC_CallNotes],@IC_AgentName=[IC_AgentName]
 			 from ETL_AutoDialer_TMP
@@ -4821,6 +4893,20 @@ BEGIN
 
              delete from ETL_AutoDialer_TMP where [Patient Activity ID]=@PatientActivityId
 END
+
+INSERT INTO SRC_AutoLoaderFrontLoader(
+patientid,
+patientactivityid,
+Type
+)
+select a.patientid,
+a.[Patient Activity ID],
+'NP'
+from ETL_AutoDialer_List_STG a
+inner join patient b on a.patientid = b.patientid
+inner join patientactivity c on a.[patient activity id] = c.patientactivityid
+where [IC_SystemClassification] = '5717'
+and (c.activityid = 9945 or c.activityid = 9946 or c.activityid = 9947)
 
 UPDATE ETL_AutoDialer_List_STG SET 
 TransferToRc = 1,
@@ -4872,6 +4958,20 @@ BEGIN
              delete from ETL_AutoDialer_TMP where [Patient Activity ID]=@PatientActivityId
 END
 
+INSERT INTO SRC_AutoLoaderFrontLoader(
+patientid,
+patientactivityid,
+Type
+)
+select a.patientid,
+a.[Patient Activity ID],
+'NP'
+from ETL_AutoDialer_List_STG a
+inner join patient b on a.patientid = b.patientid
+inner join patientactivity c on a.[patient activity id] = c.patientactivityid
+where [IC_SystemClassification] = '5718'
+and (c.activityid = 9945 or c.activityid = 9946 or c.activityid = 9947)
+
 UPDATE ETL_AutoDialer_List_STG SET 
 TransferToRc = 1,
 ModifiedOn = getdate()
@@ -4889,6 +4989,8 @@ Select * into ETL_AutoDialer_TMP from ETL_AutoDialer_List_STG where [IC_SystemCl
 
 WHILE (SELECT COUNT(1) FROM ETL_AutoDialer_TMP) > 0 
 BEGIN
+
+
 
                select Top 1 @PatientActivityId=[Patient Activity ID], @IC_DateOfLastCall= case when [IC_DateOfLastCall] is null then '' else cast([IC_DateOfLastCall] as varchar(max)) end, 
 			 @IC_CallNotes=[IC_CallNotes],@IC_AgentName=[IC_AgentName]
@@ -4922,6 +5024,21 @@ BEGIN
              delete from ETL_AutoDialer_TMP where [Patient Activity ID]=@PatientActivityId
 END
 
+INSERT INTO SRC_AutoLoaderFrontLoader(
+patientid,
+patientactivityid,
+Type
+)
+select a.patientid,
+a.[Patient Activity ID],
+'NP'
+from ETL_AutoDialer_List_STG a
+inner join patient b on a.patientid = b.patientid
+inner join patientactivity c on a.[patient activity id] = c.patientactivityid
+where [IC_SystemClassification] = '6375'
+and (c.activityid = 9945 or c.activityid = 9946 or c.activityid = 9947)
+
+
 UPDATE ETL_AutoDialer_List_STG SET 
 TransferToRc = 1,
 ModifiedOn = getdate()
@@ -4930,7 +5047,7 @@ where [IC_SystemClassification] = '6375'
 COMMIT
 
 
-------------------------------PROCESS CREATE NEW TASKS--------------------------------------------------
+------------------------------PROCESS TO ENSURE EXLCUSION CRITERIAS ARE MET--------------------------------------------------
 
 DROP TABLE  SRC_AutoLoaderFrontLoader_Patinet
 
@@ -4977,14 +5094,16 @@ Patientid,
 PatientActivityID,
 PatientStatus,
 CurrentOutreachAttempt,
-CreatedOn
+CreatedOn,
+Type
 )
 Select 
 a.Patientid,
 a.PatientActivityID,
 PatientStatus,
 DisplayValue,
-getutcdate() as CreatedOn
+getutcdate() as CreatedOn,
+a.Type
 from SRC_AutoLoaderFrontLoader a
 inner join patientactivity b on a.patientActivityID = b.patientActivityID
 inner join lookup c on c.lookupid = b.activityid
@@ -4992,22 +5111,32 @@ inner join lookup c on c.lookupid = b.activityid
 
 
 
---exclusion criteria makes sure that for the outreach that needs to be created that its not already open
+--exclusion criteria that needs be observed in order to not create new Outreach tasks 
 DELETE a from SRC_AutoLoaderFrontLoader a
 inner join patientactivity b on a.patientid = b.patientid
 inner join patienteligibility c on a.patientid = c.patientid
 inner join patient d on a.Patientid = d.PatientId
-where (b.activityid = 2297 and b.activitystatusid = 104)
-or (b.activityid = 2298 and b.activitystatusid = 104)
-or (b.activityid = 9755 and b.activitystatusid = 104)
-or (b.activityid = 9756 and b.activitystatusid = 104)
-or (b.activityid = 9757 and b.activitystatusid = 104)
+where a.Type = 'Outreach'
+and ((b.activityid IN(2296,2297,2298,9755,9756,9757) and b.activitystatusid = 104)
 or (c.activepatient = 0)
 or (a.patientstatus like 'Written Consent%')
 or (a.patientstatus like 'On Hold%' and d.OnHoldStatusId = 8860)
 or (a.patientstatus like 'Deceased%')
 or (a.patientstatus like 'Verbal Consent%')
-or (a.patientstatus like 'Reached%')
+or (a.patientstatus like 'Reached%'))
+
+
+
+--exclusion criteria that needs be observed in order to not create new NP tasks 
+DELETE a from SRC_AutoLoaderFrontLoader a
+inner join patientactivity b on a.patientid = b.patientid
+inner join patienteligibility c on a.patientid = c.patientid
+inner join patient d on a.Patientid = d.PatientId
+where a.Type = 'NP'
+and ((b.activityid IN(9945,9946,9947,9948) and b.activitystatusid = 104)
+or (c.activepatient = 0)
+or (a.patientstatus like 'On Hold%' or d.OnHoldStatusId = 8860)
+or (a.patientstatus like 'Deceased%'))
 
 
 --OutreachAttemptCreated shows which outreach attempt will be created
@@ -5016,26 +5145,33 @@ Patientid,
 PatientActivityID,
 PatientStatus,
 OutreachAttemptCreated,
-CreatedOn
+CreatedOn,
+Type
 )
 Select 
 a.Patientid,
 a.PatientActivityID,
 PatientStatus,
  DisplayValue,
-getutcdate() as CreatedOn
+getutcdate() as CreatedOn,
+a.Type
 from SRC_AutoLoaderFrontLoader a
 inner join patientactivity b on a.patientActivityID = b.patientActivityID
 inner join lookup c on  case when b.activityid = 2296 then 2297
 when b.activityid = 2297 then 2298
 when b.activityid = 2298 then 9755
 when b.activityid = 9755 then 9756
-when b.activityid = 9756 then 9757 end  = c.lookupid 
+when b.activityid = 9756 then 9757
+when b.activityid = 9945 then 9946
+when b.activityid = 9946 then 9947
+when b.activityid = 9947 then 9948 end  = c.lookupid 
 
+
+---------------CREATE NEW OUTREACH TASKS------------------------
 
 DROP TABLE SRC_AutoLoaderFrontLoader_Task
 
-select * into SRC_AutoLoaderFrontLoader_Task from SRC_AutoLoaderFrontLoader
+select * into SRC_AutoLoaderFrontLoader_Task from SRC_AutoLoaderFrontLoader where type = 'Outreach'
 
 while(select count(*) from SRC_AutoLoaderFrontLoader_Task) > 0
 Begin
@@ -5043,7 +5179,7 @@ Begin
 
 select top 1 @PatientActivityId = PatientActivityId from SRC_AutoLoaderFrontLoader_Task
 
-UPDATE TASK SET modifiedbyuserid = 1574 
+UPDATE TASK SET modifiedbyuserid = 1574, modifiedon = getdate() 
 where PatientActivityId = @PatientActivityId
 
 Delete from SRC_AutoLoaderFrontLoader_Task
@@ -5052,35 +5188,92 @@ where PatientActivityId = @PatientActivityId
 end
 
 
-UPDATE PatientActivity SET modifiedbyuserid = 1574 
+UPDATE PatientActivity SET modifiedbyuserid = 1574, modifiedon = getdate()
 from PatientActivity a 
 inner join SRC_AutoLoaderFrontLoader b on a.patientActivityID = b.patientActivityID
+where b.type = 'Outreach'
 
 
 
 BEGIN TRANSACTION 
 
-while(select count(*) from SRC_AutoLoaderFrontLoader) > 0
+while(select count(*) from SRC_AutoLoaderFrontLoader where type = 'Outreach') > 0
 Begin
 
-declare @taskid int, @patientid int
 
 select top 1 
 @patientid =  patientid,
 @taskid = b.TaskId
 from SRC_AutoLoaderFrontLoader a
 inner join task b on a.patientActivityID = b.patientActivityID
+where a.type = 'Outreach'
 
 --2nd exclusion criteria updated to ensure no duplicate OR#N are created
 IF NOT EXISTS (
-SELECT PatientActivityId from PatientActivity where (PatientId=@PatientId and ActivityId=2296 AND ActivityStatusId = 104 AND IsDeleted = 0) 
-OR (PatientId=@PatientId and ActivityId=2297 AND ActivityStatusId = 104 AND IsDeleted = 0) 
-OR (PatientId=@PatientId and ActivityId=2298 AND ActivityStatusId = 104 AND IsDeleted = 0)
-OR (PatientId=@PatientId and ActivityId=9755 AND ActivityStatusId = 104 AND IsDeleted = 0)
-OR (PatientId=@PatientId and ActivityId=9756 AND ActivityStatusId = 104 AND IsDeleted = 0)
-OR (PatientId=@PatientId and ActivityId=9757 AND ActivityStatusId = 104 AND IsDeleted = 0))
+SELECT PatientActivityId from PatientActivity where (PatientId=@PatientId and ActivityId IN(2296,2297,2298,9755,9756,9757) AND ActivityStatusId = 104 AND IsDeleted = 0))
 exec sp_RuleEngineOutReachRuleCheck @Taskid = @taskid, @PatientId=@patientid, @InvokedFrom = 'AutoDialer'
 
+
+Delete from SRC_AutoLoaderFrontLoader
+where patientid = @patientid
+and patientactivityid in (select patientactivityid from task where taskid = @taskid)
+
+end
+
+COMMIT
+
+
+
+
+-----------------------PROCESS TO CREATE NEW NP TASKS-----------------------------------
+
+
+DROP TABLE SRC_AutoLoaderFrontLoader_Task
+
+select * into SRC_AutoLoaderFrontLoader_Task from SRC_AutoLoaderFrontLoader where type = 'NP'
+
+while(select count(*) from SRC_AutoLoaderFrontLoader_Task) > 0
+Begin
+
+
+
+select top 1 @PatientActivityId = PatientActivityId from SRC_AutoLoaderFrontLoader_Task
+
+UPDATE TASK SET modifiedbyuserid = 340, modifiedon = getdate()
+where PatientActivityId = @PatientActivityId
+
+
+Delete from SRC_AutoLoaderFrontLoader_Task
+where PatientActivityId = @PatientActivityId
+
+end
+
+
+UPDATE PatientActivity SET modifiedbyuserid = 340,modifiedon = getdate()
+from PatientActivity a 
+inner join SRC_AutoLoaderFrontLoader b on a.patientActivityID = b.patientActivityID
+where b.type = 'NP'
+
+
+
+BEGIN TRANSACTION 
+
+while(select count(*) from SRC_AutoLoaderFrontLoader where type = 'NP') > 0
+Begin
+ 
+
+
+select top 1 
+@patientid =  patientid,
+@taskid = b.TaskId
+from SRC_AutoLoaderFrontLoader a
+inner join task b on a.patientActivityID = b.patientActivityID
+where a.type = 'NP'
+
+--2nd exclusion criteria updated to ensure no duplicate NP#N are created
+IF NOT EXISTS (
+SELECT PatientActivityId from PatientActivity where (PatientId=@PatientId and ActivityId IN (9945,9946,9947,9948) AND ActivityStatusId = 104 AND IsDeleted = 0))
+exec sp_RuleEngineBusinessRule35 @Taskid = @taskid, @PatientId=@patientid
 
 Delete from SRC_AutoLoaderFrontLoader
 where patientid = @patientid
@@ -5094,6 +5287,8 @@ COMMIT
 UPDATE ETL_AutoDialer_List_STG SET TransferToRC = -1
 where TransferToRC = 0
 
-GO
+
+
+
 
 
